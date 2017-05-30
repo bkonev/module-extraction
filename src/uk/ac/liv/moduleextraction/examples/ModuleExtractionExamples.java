@@ -5,15 +5,18 @@ import uk.ac.liv.moduleextraction.experiments.AMEXvsSTAR;
 import uk.ac.liv.moduleextraction.experiments.Experiment;
 import uk.ac.liv.moduleextraction.experiments.MultipleExperiments;
 import uk.ac.liv.moduleextraction.experiments.NDepletingExperiment;
-import uk.ac.liv.moduleextraction.extractor.AMEX;
 import uk.ac.liv.moduleextraction.extractor.ExtractorException;
 import uk.ac.liv.moduleextraction.extractor.STARAMEXHybridExtractor;
+import uk.ac.liv.moduleextraction.extractor.STARExtractor;
+import uk.ac.liv.moduleextraction.extractor.STARMEXHybridExtractor;
 import uk.ac.liv.moduleextraction.signature.SigManager;
 import uk.ac.liv.moduleextraction.signature.SignatureGenerator;
 import uk.ac.liv.moduleextraction.signature.WriteAxiomSignatures;
 import uk.ac.liv.moduleextraction.signature.WriteRandomSigs;
 import uk.ac.liv.moduleextraction.util.ModuleUtils;
 import uk.ac.liv.moduleextraction.util.OntologyLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +27,15 @@ import java.util.Set;
  */
 public class ModuleExtractionExamples {
 
+    public static final String ONTOLOGY_OWL = "test/data/equiv.krss"; // ontology file
+    //public static final String ONTOLOGY_OWL = "/Users/konev/Downloads/NCITNCBO.owl"; // ontology file
+    //public static final String ONTOLOGY_OWL = "/Users/konev/work/Liverpool/anti/software/GFO/gfo-basic.owl"; // ontology file
+    public static final String PATH_TO_SIGNATURES = "/tmp"; // path to signatures
+    public static final String PATH_TO_RESULTS = "/tmp"; // path to results
 
 
     public static void main(String[] args) {
+        // System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
         /* Run the examples */
         try {
             ModuleExtractionExamples.usingModuleExtractors();
@@ -41,16 +50,26 @@ public class ModuleExtractionExamples {
 
     public static void usingModuleExtractors() throws ExtractorException {
         //Load the ontology from a file - CHANGE THIS to your own ontology
-        //Make sure ontologies are suitable for use with the extractor before using it - i.e don't use more expressive  than ALCQI with AMEX
-        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/path/to/ontology.owl");
+        //Make sure ontologies are suitable for use with the starExtractor before using it - i.e don't use more expressive  than ALCQI with AMEX
+        Logger logger = LoggerFactory.getLogger(ModuleExtractionExamples.class);
+
+        System.out.print("Loading ontology...");
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ONTOLOGY_OWL);
+        System.out.println("done");
 
         //Create the module extractors - implement the Extractor interface
-        AMEX amex = new AMEX(ont);
-        STARAMEXHybridExtractor hybrid = new STARAMEXHybridExtractor(ont);
+        //AMEX amex = new AMEX(ont);
+        STARExtractor           starExtractor            = new STARExtractor(ont);
+        STARAMEXHybridExtractor staramexHybridExtractor  = new STARAMEXHybridExtractor(ont);
+        STARMEXHybridExtractor  starmexHybridExtractor   = new STARMEXHybridExtractor(ont);
         //MEX mex = new MEX(ont);
 
         //Generate a set of 1000 random axioms from the ontology
+        System.out.print("Generating signatures...");
         Set<OWLLogicalAxiom> randomAxs = ModuleUtils.generateRandomAxioms(ont.getLogicalAxioms(),1000);
+        System.out.println("done");
+
+        System.out.println("Starting module extraction ...");
 
         //Extract a module for the signature of each axiom
         for(OWLLogicalAxiom ax : randomAxs){
@@ -58,21 +77,32 @@ public class ModuleExtractionExamples {
             //Signature of the axiom
             Set<OWLEntity> sig = ax.getSignature();
 
-            //Extract the modules - N.B don't need a new extractor object for each signature
-            Set<OWLLogicalAxiom> amexMod = amex.extractModule(sig);
-            Set<OWLLogicalAxiom> hybridMod = hybrid.extractModule(sig);
+            logger.trace("Signature: {}", sig);
 
-            System.out.println("AMEX: " + amexMod.size());
-            System.out.println("HYBRID: " + hybridMod.size());
-            System.out.println("STAR: " + hybrid.getStarModule().size()); //STAR module is computed through the hybrid module
+            //Extract the modules - N.B don't need a new starExtractor object for each signature
+            //Set<OWLLogicalAxiom> amexMod = amex.extractModule(sig);
+            Set<OWLLogicalAxiom> starMod     = starExtractor.extractModule(sig);
+            Set<OWLLogicalAxiom> starmexMod  = starmexHybridExtractor.extractModule(sig);
+            Set<OWLLogicalAxiom> starAmexMod = staramexHybridExtractor.extractModule(sig);
+
+            logger.trace("eli hybrid module {}", starmexMod);
+            logger.trace("alcqui hybrid module {}", starAmexMod);
+            logger.trace("star module {}", starMod);
+
+            //System.out.println("AMEX: " + amexMod.size());
+
+            System.out.println("STAR-AMEX HYBRID: " + starAmexMod.size());
+            System.out.println("STAR-MEX HYBRID: " + starmexMod.size());
+            System.out.println("STAR: " + starMod.size());
             System.out.println();
         }
+        System.out.println("...done");
 
     }
 
     public static void generatingSignatures(){
         //Load ontology
-        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/path/to/ontology.owl");
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ONTOLOGY_OWL);
 
         //Intitalise the signature generator
         SignatureGenerator gen = new SignatureGenerator(ont.getLogicalAxioms());
@@ -95,7 +125,7 @@ public class ModuleExtractionExamples {
         /* Writing signatures to file useful for experiments and reproducing */
 
         //Ontology
-        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/path/to/ontology.owl");
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ONTOLOGY_OWL);
 
         //Location to save signatures
         File f = new File("/path/to/Signatures");
@@ -122,7 +152,7 @@ public class ModuleExtractionExamples {
 
     public static void readSignaturesFromFile() throws IOException {
         //Set up signature manager pointing to a chosen directory
-        SigManager manager = new SigManager(new File("/path/to/Signatures"));
+        SigManager manager = new SigManager(new File(PATH_TO_SIGNATURES));
 
         //Read signature from file in chosen directory
         Set<OWLEntity> sig = manager.readFile("signature.txt");
@@ -136,7 +166,7 @@ public class ModuleExtractionExamples {
 
     public void runningExperiments() {
         //Load the ontology
-        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/path/to/ontology.owl");
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ONTOLOGY_OWL);
 
         //These are for running things and saving the results
         //All experiments use the Experiment interface
@@ -149,7 +179,7 @@ public class ModuleExtractionExamples {
         SignatureGenerator gen = new SignatureGenerator(ont.getLogicalAxioms());
 
         //Where to save the results - multiple results can be saved to the same directory
-        File resultLocation = new File("/path/to/Results");
+        File resultLocation = new File(PATH_TO_RESULTS);
 
         for (int i = 0; i < 100; i++) {
             Set<OWLEntity> signature = gen.generateRandomSignature(100);
@@ -160,7 +190,7 @@ public class ModuleExtractionExamples {
 
     public void multipleExperiments() throws IOException {
         //Ont file
-        File ontLocation = new File("/path/to/ontology.owl");
+        File ontLocation = new File(ONTOLOGY_OWL);
 
         //Load the ontology from the file
         OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ontLocation.getAbsolutePath());
@@ -174,8 +204,8 @@ public class ModuleExtractionExamples {
         MultipleExperiments multiple = new MultipleExperiments();
 
 
-        File signatureLocation = new File("/path/to/Signatures");
-        File resultLocation = new File("/path/to/Results");
+        File signatureLocation = new File(PATH_TO_SIGNATURES);
+        File resultLocation = new File(PATH_TO_RESULTS);
 
         //Writes every axiom signature of the ontology
         WriteAxiomSignatures axiomSignatures = new WriteAxiomSignatures(ont, signatureLocation);

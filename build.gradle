@@ -1,4 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'uk.ac.liv.moduleextraction.examples.ModuleExtractionExamples'
 
 // IDE integration. To use idea or eclipse, uncomment the 
 // appropriate line and run 'gradle eclipse' etc

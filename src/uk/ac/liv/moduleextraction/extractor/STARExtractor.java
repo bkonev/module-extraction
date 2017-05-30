@@ -24,6 +24,7 @@ public class STARExtractor implements Extractor {
 
     public STARExtractor(OWLOntology ontology){
         this.ontology = ontology;
+        manager = OWLManager.createOWLOntologyManager();
     }
 
     public STARExtractor(Set<OWLLogicalAxiom> axioms){
