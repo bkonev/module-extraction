@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: net.sourceforge.owlapi:owlapi-oboformat:3.5.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.owlapi/owlapi-oboformat/3.5.2/66ab9ce8df80865827315869d2830d1884afa1b9/owlapi-oboformat-3.5.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.owlapi/owlapi-oboformat/3.5.2/8d60452ff1b7aafc402a47e2bc3293cf3a1c88dd/owlapi-oboformat-3.5.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 // IDE integration. To use idea or eclipse, uncomment the 
 // appropriate line and run 'gradle eclipse' etc
-// apply plugin: 'idea'
+apply plugin: 'idea'
 // apply plugin: 'eclipse'
 
 // In this section you declare where to find the dependencies of your project
@@ -31,11 +31,17 @@ sourceSets {
         java {
             srcDirs = ['src']
         }
+        resources {
+            srcDirs = ['test/data']
+        }
     }
 
     test {
         java {
             srcDirs = ['test']
+        }
+        resources {
+            srcDirs = ['test/data']
         }
     }
 }

@@ -26,14 +26,16 @@ public class MEXExtraction {
     public void locateFiles(){
         Path resourceDirectory = Paths.get("test/data/");
         dataDirectory = resourceDirectory.toFile();
+        System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
     }
 
     @Test
     public void simpleIndirectDependencyExtraction() throws ExtractorException {
         OWLOntology equiv = OntologyLoader.loadOntologyAllAxioms(dataDirectory.getAbsolutePath() + "/equiv.krss");
+
         ModuleUtils.remapIRIs(equiv, "X");
         ArrayList<OWLLogicalAxiom> axioms = new ArrayList<>(equiv.getLogicalAxioms());
-        Collections.sort(axioms, new AxiomNameComparator());
+        Collections.sort(axioms, new AxiomNameBodyComparator());
 
         /*
         0:A ≡ B1 ⊓ B2
@@ -55,6 +57,7 @@ public class MEXExtraction {
         //Module  {A ≡ B1 ⊓ B2, A1 ⊑ B1, A2 ⊑ B2}
         Set<OWLLogicalAxiom> expectedMexModule = new HashSet<>(Arrays.asList(axioms.get(0), axioms.get(1), axioms.get(2)));
         Set<OWLLogicalAxiom> mexModule = mex.extractModule(sig);
+
 
         assertEquals(expectedMexModule, mexModule);
     }

@@ -51,7 +51,7 @@ public class CycleTest {
         OWLOntology complex = OntologyLoader.loadOntologyAllAxioms(dataDirectory.getAbsolutePath() + "/complexcycle.krss");
         ArrayList<OWLLogicalAxiom> axioms = new ArrayList<>(complex.getLogicalAxioms());
         //Ensure order is fixed between tests
-        Collections.sort(axioms, new AxiomNameComparator());
+        Collections.sort(axioms, new AxiomNameBodyComparator());
 
         /*
         0:A ⊑ B
@@ -131,7 +131,7 @@ public class CycleTest {
         OWLOntology selfcycle = OntologyLoader.loadOntologyAllAxioms(dataDirectory.getAbsolutePath() + "/selfcycle.krss");
         ArrayList<OWLLogicalAxiom> axioms = new ArrayList<>(selfcycle.getLogicalAxioms());
 
-        Collections.sort(axioms, new AxiomNameComparator());
+        Collections.sort(axioms, new AxiomNameBodyComparator());
 
 
         /*
@@ -151,7 +151,7 @@ public class CycleTest {
         checkSet.removeAll(verifier.getCycleCausingAxioms());
 
         //Set still contains W ⊑ X
-        assertTrue("Should contain " + axioms.get(0), checkSet.contains(axioms.get(0)));
+        assertTrue(checkSet + " should contain " + axioms.get(0), checkSet.contains(axioms.get(0)));
 
         verifier = new OntologyCycleVerifier(checkSet);
 
