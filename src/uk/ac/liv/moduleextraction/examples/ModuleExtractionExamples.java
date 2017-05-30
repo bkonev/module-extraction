@@ -27,7 +27,9 @@ import java.util.Set;
  */
 public class ModuleExtractionExamples {
 
-    public static final String ONTOLOGY_OWL = "test/data/equiv.krss"; // ontology file
+    public static final String ONTOLOGY_OWL = "test/data/galen.owl"; // ontology file
+    //public static final String ONTOLOGY_OWL = "/Users/konev/Downloads/ATC.ttl"; // ontology file
+    //public static final String ONTOLOGY_OWL = "test/data/equiv.krss"; // ontology file
     //public static final String ONTOLOGY_OWL = "/Users/konev/Downloads/NCITNCBO.owl"; // ontology file
     //public static final String ONTOLOGY_OWL = "/Users/konev/work/Liverpool/anti/software/GFO/gfo-basic.owl"; // ontology file
     public static final String PATH_TO_SIGNATURES = "/tmp"; // path to signatures
@@ -70,6 +72,7 @@ public class ModuleExtractionExamples {
         System.out.println("done");
 
         System.out.println("Starting module extraction ...");
+        System.out.println("STAR-AMEX, STAR-MEX, STAR");
 
         //Extract a module for the signature of each axiom
         for(OWLLogicalAxiom ax : randomAxs){
@@ -91,9 +94,9 @@ public class ModuleExtractionExamples {
 
             //System.out.println("AMEX: " + amexMod.size());
 
-            System.out.println("STAR-AMEX HYBRID: " + starAmexMod.size());
-            System.out.println("STAR-MEX HYBRID: " + starmexMod.size());
-            System.out.println("STAR: " + starMod.size());
+            System.out.print(starAmexMod.size());
+            System.out.print(", " + starmexMod.size());
+            System.out.print(", " + starMod.size());
             System.out.println();
         }
         System.out.println("...done");
