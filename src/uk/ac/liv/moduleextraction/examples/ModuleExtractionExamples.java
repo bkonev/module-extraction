@@ -96,6 +96,7 @@ public class ModuleExtractionExamples {
 
             System.out.print(starAmexMod.size());
             System.out.print(", " + starmexMod.size());
+            System.out.print(", " + starmexHybridExtractor.getStarModule().size());
             System.out.print(", " + starMod.size());
             System.out.println();
         }
