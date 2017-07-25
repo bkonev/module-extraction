@@ -1,0 +1,226 @@
+package uk.ac.liv.moduleextraction.extractor;
+
+import com.google.common.base.Stopwatch;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLAPIStreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.liv.moduleextraction.axiomdependencies.AxiomDependencies;
+import uk.ac.liv.moduleextraction.axiomdependencies.DefinitorialAxiomStore;
+import uk.ac.liv.moduleextraction.checkers.AxiomDependencyChecker;
+import uk.ac.liv.moduleextraction.checkers.ExtendedLHSSigExtractor;
+import uk.ac.liv.moduleextraction.checkers.NElementInseparableChecker;
+import uk.ac.liv.moduleextraction.cycles.OntologyCycleVerifier;
+import uk.ac.liv.moduleextraction.metrics.ExtractionMetric;
+import uk.ac.liv.moduleextraction.propositional.nSeparability.nAxiomToClauseStore;
+import uk.ac.liv.moduleextraction.qbf.OneElementSeparabilityAxiomLocator;
+import uk.ac.liv.moduleextraction.qbf.QBFSolverException;
+import uk.ac.liv.moduleextraction.util.*;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+public class AMEX implements Extractor{
+
+	private AxiomDependencies dependencies;
+	private Set<OWLLogicalAxiom> module;
+	private Set<OWLEntity> sigUnionSigM;
+	private AxiomDependencyChecker axiomDependencyChecker;
+	private DefinitorialAxiomStore axiomStore;
+	
+	private ExtendedLHSSigExtractor lhsExtractor;
+	private NElementInseparableChecker oneElementInseparableChecker;
+	private ExtractionMetric.MetricBuilder metricBuilder;
+
+	private long syntacticChecks = 0; // A syntactic iteration (total checks = this + qbfchecks)
+	private long timeTaken = 0; //Time taken to setup and extract the module (ms)
+	private long qbfChecks = 0; //Total number of times we actually call the qbf solver
+	private long separabilityChecks = 0; // Number of times we need to search for a separability causing axiom
+
+	private nAxiomToClauseStore clauseStoreMapping;
+
+	private Logger logger = LoggerFactory.getLogger(AMEX.class);
+			
+
+	
+	public AMEX(OWLOntology ontology) throws   ExtractorException{
+		this(OWLAPIStreamUtils.asSet(ontology.logicalAxioms()));
+	}
+	
+	public AMEX(Set<OWLLogicalAxiom> ontology) throws ExtractorException{
+		if(isOntologyValid(ontology)){
+			dependencies = new AxiomDependencies(ontology);
+			axiomStore = new DefinitorialAxiomStore(dependencies.getDefinitorialSortedAxioms());
+
+			axiomDependencyChecker = new AxiomDependencyChecker();
+
+			lhsExtractor = new ExtendedLHSSigExtractor();
+			clauseStoreMapping = new nAxiomToClauseStore(1);
+			oneElementInseparableChecker = new NElementInseparableChecker(clauseStoreMapping);
+		}
+	}
+
+	private boolean isOntologyValid(Set<OWLLogicalAxiom> ontology) throws ExtractorException{
+
+		ALCQIOntologyVerifier alcqiVerifier = new ALCQIOntologyVerifier();
+		TerminologyValidator termValid = new TerminologyValidator(ontology);
+
+		if(alcqiVerifier.isALCQIOntology(ontology) && termValid.isTerminologyWithRCIs()) {
+			OntologyCycleVerifier cycleVerifier = new OntologyCycleVerifier(ontology);
+			return !cycleVerifier.isCyclic();
+		}
+		else{
+			throw new ExtractorException("Input ontology must be a valid acyclic ALCQI terminology with (optional) repeated inclusions");
+		}
+	}
+	
+	
+	@Override
+	public Set<OWLLogicalAxiom> extractModule(Set<OWLEntity> signature) {
+		return extractModule(new HashSet<OWLLogicalAxiom>(), signature);
+	}
+	
+	@Override
+	public Set<OWLLogicalAxiom> extractModule(Set<OWLLogicalAxiom> existingModule, Set<OWLEntity> signature) {
+		logger.debug("Extracting AMEX module for signature {}", signature);
+
+		resetMetrics();
+		metricBuilder = new ExtractionMetric.MetricBuilder(ExtractionMetric.ExtractionType.AMEX);
+
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		boolean[] terminology = axiomStore.allAxiomsAsBoolean();
+		module = existingModule;
+		sigUnionSigM = ModuleUtils.getClassAndRoleNamesInSet(existingModule);
+		sigUnionSigM.addAll(signature);
+		try {
+			applyRules(terminology);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (QBFSolverException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+
+		stopwatch.stop();
+		timeTaken = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+		return module;
+	}
+
+	private void resetMetrics() {
+		syntacticChecks = 0;
+		qbfChecks = 0;
+		separabilityChecks = 0;
+		timeTaken = 0;
+	}
+
+
+	public ExtractionMetric getMetrics(){
+		metricBuilder.moduleSize(module.size());
+		metricBuilder.timeTaken(timeTaken);
+		metricBuilder.qbfChecks(qbfChecks);
+		metricBuilder.separabilityCausingAxioms(separabilityChecks);
+		metricBuilder.syntacticChecks(syntacticChecks);
+		return metricBuilder.createMetric();
+	}
+
+
+	public LinkedHashMap<String, Long> getQBFMetrics() {
+		return oneElementInseparableChecker.getQBFMetrics();
+	}
+
+	
+	private void applyRules(boolean[] terminology) throws IOException, QBFSolverException, ExecutionException {
+		applySyntacticRule(terminology);
+		
+		HashSet<OWLLogicalAxiom> lhsSigT = lhsExtractor.getLHSSigAxioms(axiomStore.getSubsetAsList(terminology), sigUnionSigM, dependencies);
+
+		qbfChecks++;
+		if(oneElementInseparableChecker.isSeparableFromEmptySet(lhsSigT, sigUnionSigM)){
+			OWLLogicalAxiom insepAxiom = findSeparableAxiom(terminology);
+			module.add(insepAxiom);
+			sigUnionSigM.addAll(OWLAPIStreamUtils.asSet(insepAxiom.signature()));
+			axiomStore.removeAxiom(terminology, insepAxiom);
+			applyRules(terminology);
+		}
+	}
+
+
+	private OWLLogicalAxiom findSeparableAxiom(boolean[] terminology)
+			throws IOException, QBFSolverException, ExecutionException {
+		
+		separabilityChecks++;
+
+		OneElementSeparabilityAxiomLocator search =
+				new OneElementSeparabilityAxiomLocator(clauseStoreMapping,axiomStore.getSubsetAsArray(terminology), sigUnionSigM, dependencies);
+
+		OWLLogicalAxiom insepAxiom = search.getSeparabilityCausingAxiom();
+		logger.trace("Separability Causing: {}", insepAxiom);
+		qbfChecks += search.getCheckCount();
+		return insepAxiom;
+	}
+
+
+	private void applySyntacticRule(boolean[] terminology){
+		boolean change = true;
+		
+		while(change){
+			change = false;
+			for (int i = 0; i < terminology.length; i++) {
+				
+				if(terminology[i]){
+					
+					OWLLogicalAxiom chosenAxiom = axiomStore.getAxiom(i);
+					syntacticChecks++;
+					if(axiomDependencyChecker.hasSyntacticSigDependency(chosenAxiom, dependencies, sigUnionSigM)){
+						
+						change = true;
+
+						module.add(chosenAxiom);
+						terminology[i] = false;
+						logger.trace("Axiom dependency: {}", chosenAxiom);
+						sigUnionSigM.addAll(OWLAPIStreamUtils.asSet(chosenAxiom.signature()));
+						
+						
+					}
+				}
+			}
+		}
+	
+	}
+
+	public static void main(String[] args) throws ExtractorException {
+		//Thesis example
+
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ModulePaths.getOntologyLocation() + "/shared/vent.krss");
+		ModuleUtils.remapIRIs(ont, "X");
+		ont.logicalAxioms().forEach(System.out::println);
+
+		Set<OWLEntity> signature = new HashSet<>();
+
+		OWLDataFactory f = ont.getOWLOntologyManager().getOWLDataFactory();
+
+		signature.add(f.getOWLClass(IRI.create("X#A")));
+		signature.add(f.getOWLClass(IRI.create("X#C")));
+		signature.add(f.getOWLClass(IRI.create("X#LVC")));
+
+
+		AMEX amex = new AMEX(ont);
+
+		System.out.println(amex.extractModule(signature));
+
+	}
+	
+
+
+
+	 
+
+
+	
+
+}

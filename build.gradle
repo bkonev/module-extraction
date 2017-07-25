@@ -1,58 +1,48 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'idea'
 
 mainClassName = 'uk.ac.liv.moduleextraction.examples.ModuleExtractionExamples'
 
-// IDE integration. To use idea or eclipse, uncomment the 
-// appropriate line and run 'gradle eclipse' etc
-apply plugin: 'idea'
-// apply plugin: 'eclipse'
+//Need to be java 1.8+
+targetCompatibility = '1.8'
 
-// In this section you declare where to find the dependencies of your project
+
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
-// In this section you declare the dependencies for your production and test
-// code
 dependencies {
     // jar dependencies
-    compile 'com.google.guava:guava:18.0'
-    compile 'net.sourceforge.owlapi:owlapi-distribution:3.5.2'
+    compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
     compile 'org.slf4j:slf4j-api:1.7.2'
     compile 'org.slf4j:slf4j-simple:1.7.2'
-    compile 'net.sf.trove4j:trove4j:3.0.3'
-    compile 'org.hamcrest:hamcrest-core:1.3'
+
 
     // testing
     testCompile 'junit:junit:4.12'
 }
 
-// file location is non-standard
 sourceSets {
-    main {
-        java {
-            srcDirs = ['src']
-        }
-        resources {
-            srcDirs = ['test/data']
-        }
-    }
-
     test {
-        java {
-            srcDirs = ['test']
-        }
         resources {
-            srcDirs = ['test/data']
+            srcDirs = ['src/test/data']
         }
     }
 }
-
 // Require the environment variable to be set
 test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        showStandardStreams = true
+        exceptionFormat = 'full'
+        events 'passed', 'failed'
+    }
+
     if(null == System.getenv()['QBF_LOCATION']) {
         throw new GradleException(
             'Required QBF_LOCATION environment variable not set.')
     }
+
+
 }
