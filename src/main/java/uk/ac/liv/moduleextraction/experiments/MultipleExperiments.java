@@ -144,7 +144,7 @@ public class MultipleExperiments {
         Stack<String> directoriesToWrite = new Stack<String>();
 
         //Push all the directories from the end backwards to the sourceLimit (if applicable)
-        while(!source.getName().equals(sourceLimit) || source.getParent() == null){
+        while(!source.getName().equals(sourceLimit) && source.getParent() != null){
             if(source.isDirectory()){
                 directoriesToWrite.push(source.getName());
             }
