@@ -174,7 +174,7 @@ public class MultipleExperiments {
 
     public static void main(String[] args) throws OWLOntologyCreationException, NotEquivalentToTerminologyException, IOException, OWLOntologyStorageException, InterruptedException {
 
-        File ontDir = new File(ModulePaths.getOntologyLocation() + "/Bioportal/at-most-sriq");
+        File ontDir = new File(ModulePaths.getOntologyLocation() );
         File[] files = ontDir.listFiles();
         HashMap<String,Integer> ontSize = new HashMap<>();
 
@@ -192,7 +192,7 @@ public class MultipleExperiments {
         for(File ontFile : files){
             OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(ontFile.getAbsolutePath());
             new MultipleExperiments().runExperiments(
-                    new File(ModulePaths.getSignatureLocation() + "/Bioportal/at-most-sriq/" + ontFile.getName()),
+                    new File(ModulePaths.getSignatureLocation() + ontFile.getName()),
                     new NDepletingExperiment(2,ont,ontFile), new File("/tmp/"));
 
             ont.getOWLOntologyManager().removeOntology(ont);

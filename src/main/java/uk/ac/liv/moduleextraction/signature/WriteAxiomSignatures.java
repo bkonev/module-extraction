@@ -49,7 +49,7 @@ public class WriteAxiomSignatures {
 
 
 
-		File[] files = new File(ModulePaths.getOntologyLocation() + "/Bioportal/at-most-sriq").listFiles();
+		File[] files = new File(ModulePaths.getOntologyLocation()).listFiles();
 		int i = 1;
 		for(File f : files){
 			System.out.println("Expr: " + i++);
@@ -57,7 +57,7 @@ public class WriteAxiomSignatures {
 				System.out.print(f.getName() + ": ");
 				OWLOntology ont = OntologyLoader.loadOntologyAllAxioms(f.getAbsolutePath());
 				 WriteAxiomSignatures writer = new WriteAxiomSignatures(ont,
-						 new File(ModulePaths.getSignatureLocation() + "/Bioportal/at-most-sriq/" + f.getName()));
+						 new File(ModulePaths.getSignatureLocation() + f.getName()));
 				   writer.writeAxiomSignatures();
 				   ont.getOWLOntologyManager().removeOntology(ont);
 			}
