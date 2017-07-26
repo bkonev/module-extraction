@@ -8,6 +8,7 @@ import uk.ac.liv.moduleextraction.util.OntologyLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 public class WriteAxiomSignatures {
@@ -23,19 +24,28 @@ public class WriteAxiomSignatures {
 		this.axioms = axioms;
 		this.saveLocation = saveLocation;
 	}
+
+	public Set<Set<OWLEntity>> getAxiomSignatures() {
+		OWLDataFactory factory = OWLManager.getOWLDataFactory();
+		Set<Set<OWLEntity>> result = new HashSet<>();
+		for(OWLLogicalAxiom axiom : axioms){
+			Set<OWLEntity> signature = OWLAPIStreamUtils.asSet(axiom.signature());
+			signature.remove(factory.getOWLThing());
+			signature.remove(factory.getOWLNothing());
+			result.add(signature);
+		}
+		return result;
+	}
 	
 	public void writeAxiomSignatures(){
 		OWLDataFactory factory = OWLManager.getOWLDataFactory();
 		SigManager sigmanager = new SigManager(saveLocation);
 		int i = 0;
-		for(OWLLogicalAxiom axiom : axioms){
+		for(Set<OWLEntity> sig : getAxiomSignatures()) {
 			i++;
-			Set<OWLEntity> signature = OWLAPIStreamUtils.asSet(axiom.signature());
-			signature.remove(factory.getOWLThing());
-			signature.remove(factory.getOWLNothing());
 			try {
 				//Give each axiom a unique file name
-				sigmanager.writeFile(signature, "axiom" + axiom.toString().hashCode());
+				sigmanager.writeFile(sig, "axiom" + sig.toString().hashCode());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

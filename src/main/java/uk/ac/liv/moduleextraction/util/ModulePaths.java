@@ -15,7 +15,8 @@ public class ModulePaths {
     }
     
     public static String getResultLocation(){
-    	return envVariables.get("RESULT_LOCATION");
+        String loc = envVariables.get("RESULT_LOCATION");
+    	return (loc==null) ? "/tmp" : loc;
     }
     
     public static String getQBFSolverLocation(){
