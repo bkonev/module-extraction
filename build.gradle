@@ -2,7 +2,8 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'idea'
 
-mainClassName = 'uk.ac.liv.moduleextraction.examples.ModuleExtractionExamples'
+//mainClassName = 'uk.ac.liv.moduleextraction.examples.ModuleExtractionExamples'
+mainClassName = 'uk.ac.liv.moduleextraction.experiments.AxiomSignatureExperiments'
 
 //Need to be java 1.8+
 targetCompatibility = '1.8'
@@ -22,7 +23,6 @@ dependencies {
 
     // testing
     testCompile 'junit:junit:4.12'
-    testcompile 'org.slf4j:slf4j-simple:1.7.2'
 }
 
 sourceSets {

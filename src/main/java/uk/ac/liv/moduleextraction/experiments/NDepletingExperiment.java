@@ -80,7 +80,7 @@ public class NDepletingExperiment implements  Experiment{
 
         System.out.print("Extracting hybrid: ");
         hybridExperiment.performExperiment(signature);
-        hybridModule = hybridExperiment.getHybridModule();
+        hybridModule = hybridExperiment.getHybridAmexModule();
         System.out.println(hybridModule.size());
 
         int hybridSize = hybridModule.size();
@@ -125,11 +125,15 @@ public class NDepletingExperiment implements  Experiment{
 
         CSVWriter csvWriter = new CSVWriter(experimentLocation.getAbsoluteFile() + "/" + "hybrid-metrics.csv");
         csvWriter.addMetric("StarSize", hybridExperiment.getStarSize());
-        csvWriter.addMetric("HybridSize", hybridExperiment.getIteratedSize());
+        csvWriter.addMetric("HybridAmexSize", hybridExperiment.getHybridAmexSize());
+        csvWriter.addMetric("HybridMexSize", hybridExperiment.getHybridMexSize());
         csvWriter.addMetric("TimeSTAR",  hybridExperiment.getStarWatch().elapsed(TimeUnit.MILLISECONDS));
-        csvWriter.addMetric("TimeHybrid",  hybridExperiment.getHybridWatch().elapsed(TimeUnit.MILLISECONDS));
-        csvWriter.addMetric("HybridSTARExtractions", hybridExperiment.getSTARExtractions());
-        csvWriter.addMetric("HybridAMEXExtractions", hybridExperiment.getAMEXExtractions());
+        csvWriter.addMetric("TimeAmexHybrid",  hybridExperiment.getHybridAmexWatch().elapsed(TimeUnit.MILLISECONDS));
+        csvWriter.addMetric("TimeMexHybrid",  hybridExperiment.getHybridMexWatch().elapsed(TimeUnit.MILLISECONDS));
+        csvWriter.addMetric("HybridAmexSTARExtractions", hybridExperiment.getHybridAmexSTARExtractions());
+        csvWriter.addMetric("HybridAmexAMEXExtractions", hybridExperiment.getHybridAmexAMEXExtractions());
+        csvWriter.addMetric("HybridMexSTARExtractions", hybridExperiment.getHybridMexSTARExtractions());
+        csvWriter.addMetric("HybridMexMEXExtractions", hybridExperiment.getHybridMexMEXExtractions());
         if(signatureLocation != null){
             csvWriter.addMetric("SignatureLocation", signatureLocation.getAbsolutePath());
         }

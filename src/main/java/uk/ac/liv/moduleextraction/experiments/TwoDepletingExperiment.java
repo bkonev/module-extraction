@@ -59,7 +59,7 @@ public class TwoDepletingExperiment implements  Experiment {
 
         hybridExperiment.performExperiment(signature);
 
-        hybridModule = hybridExperiment.getHybridModule();
+        hybridModule = hybridExperiment.getHybridAmexModule();
 
         try {
             oneDepletingExtractor = new NDepletingModuleExtractor(1, hybridModule);

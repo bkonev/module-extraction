@@ -47,7 +47,7 @@ public class ExactlyNDepletingComparison implements Experiment {
 
 		starAndHybridExperiment.performExperiment(signature);
 
-		Set<OWLLogicalAxiom> hybridModule = starAndHybridExperiment.getHybridModule();
+		Set<OWLLogicalAxiom> hybridModule = starAndHybridExperiment.getHybridAmexModule();
 
 		nDepletingStopwatch = Stopwatch.createStarted();
 
@@ -80,19 +80,19 @@ public class ExactlyNDepletingComparison implements Experiment {
 
 	@Override
 	public void writeMetrics(File experimentLocation) throws IOException {
-		int ndepletingSmaller = (nDepletingModule.size() < starAndHybridExperiment.getHybridModule().size()) ? 1 : 0;
+		int ndepletingSmaller = (nDepletingModule.size() < starAndHybridExperiment.getHybridAmexModule().size()) ? 1 : 0;
 
 		CSVWriter csvWriter = new CSVWriter(experimentLocation.getAbsoluteFile() + "/" + "experiment-results.csv");
 		csvWriter.addMetric("DomainSize", DOMAIN_SIZE);
 		csvWriter.addMetric("StarSize", starAndHybridExperiment.getStarSize());
-		csvWriter.addMetric("HybridSize", starAndHybridExperiment.getIteratedSize());
+		csvWriter.addMetric("HybridSize", starAndHybridExperiment.getHybridAmexSize());
 		csvWriter.addMetric("NDepletingSize", nDepletingModule.size());
 		csvWriter.addMetric("NDepletingSmaller", ndepletingSmaller);
 		csvWriter.addMetric("TimeSTAR", starAndHybridExperiment.getStarWatch().elapsed(TimeUnit.MILLISECONDS));
-		csvWriter.addMetric("TimeHybrid", starAndHybridExperiment.getHybridWatch().elapsed(TimeUnit.MILLISECONDS));
+		csvWriter.addMetric("TimeHybrid", starAndHybridExperiment.getHybridAmexWatch().elapsed(TimeUnit.MILLISECONDS));
 		csvWriter.addMetric("TimeNDepleting", nDepletingStopwatch.elapsed(TimeUnit.MILLISECONDS));
-		csvWriter.addMetric("HybridSTARExtractions",starAndHybridExperiment.getSTARExtractions());
-		csvWriter.addMetric("HybridAMEXExtractions",starAndHybridExperiment.getAMEXExtractions());
+		csvWriter.addMetric("HybridSTARExtractions",starAndHybridExperiment.getHybridAmexSTARExtractions());
+		csvWriter.addMetric("HybridAMEXExtractions",starAndHybridExperiment.getHybridAmexAMEXExtractions());
 		if(sigLocation != null){
 			csvWriter.addMetric("SignatureLocation", sigLocation.getAbsolutePath());
 		}
@@ -116,14 +116,14 @@ public class ExactlyNDepletingComparison implements Experiment {
 	}
 
     public void printMetrics() throws IOException {
-        System.out.println("S/H/D " + starAndHybridExperiment.getStarSize() + "," + starAndHybridExperiment.getIteratedSize() + "," + nDepletingModule.size());
+        System.out.println("S/H/D " + starAndHybridExperiment.getStarSize() + "," + starAndHybridExperiment.getHybridAmexSize() + "," + nDepletingModule.size());
 
-        System.out.println("Entities:" + ModuleUtils.getClassAndRoleNamesInSet(starAndHybridExperiment.getHybridModule()));
+        System.out.println("Entities:" + ModuleUtils.getClassAndRoleNamesInSet(starAndHybridExperiment.getHybridAmexModule()));
 
         System.out.println("Σ: " + refsig);
 
 
-        for(OWLLogicalAxiom ax : starAndHybridExperiment.getHybridModule()){
+        for(OWLLogicalAxiom ax : starAndHybridExperiment.getHybridAmexModule()){
             System.out.println(ax);
         }
         System.out.println("=============");
@@ -132,7 +132,7 @@ public class ExactlyNDepletingComparison implements Experiment {
         }
 
         System.out.println("Difference:");
-        Set<OWLLogicalAxiom> hybrid = starAndHybridExperiment.getHybridModule();
+        Set<OWLLogicalAxiom> hybrid = starAndHybridExperiment.getHybridAmexModule();
        //ModuleUtils.writeOntology(hybrid,ModulePaths.getOntologyLocation() + "/dep-explore.owl");
 //        SigManager man = new SigManager(new File(ModulePaths.getOntologyLocation()));
 //        man.writeFile(refsig,"explore");
