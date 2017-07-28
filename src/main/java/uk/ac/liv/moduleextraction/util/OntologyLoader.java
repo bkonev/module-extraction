@@ -27,7 +27,8 @@ public class OntologyLoader {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		
 		OWLOntologyLoaderConfiguration configuration = new OWLOntologyLoaderConfiguration();
-		configuration.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
+		// OWLOntologyLoaderConfiguration is immutable. Must use the returned value
+		configuration = configuration.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
 
 		OWLOntology ontology = null;
 		
@@ -56,10 +57,11 @@ public class OntologyLoader {
 						manager.loadOntologyFromOntologyDocument(source); //, configuration
 
 			} catch (UnparsableOntologyException e) {
-				System.out.println("Unparsable");
+				System.out.println("Unparsable ontology " + pathName);
 				e.printStackTrace();
 			} catch (UnloadableImportException importe) {
-				System.out.println("Unloadable Import");
+				System.out.println("Unloadable Import in " + pathName);
+				importe.printStackTrace();
 			} catch (OWLOntologyCreationException e) {
 				System.out.println("Creation failed: " + e.getCause());
 				e.printStackTrace();
