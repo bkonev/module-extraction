@@ -19,6 +19,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.2'
     // compile 'org.slf4j:slf4j-simple:1.7.2'
     compile 'org.slf4j:slf4j-nop:1.7.2'
+    compile 'org.apache.commons:commons-compress:1.14'
 
 
     // testing
