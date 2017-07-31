@@ -5,9 +5,9 @@ import uk.ac.liv.moduleextraction.experiments.AMEXvsSTAR;
 import uk.ac.liv.moduleextraction.experiments.Experiment;
 import uk.ac.liv.moduleextraction.experiments.MultipleExperiments;
 import uk.ac.liv.moduleextraction.experiments.NDepletingExperiment;
-import uk.ac.liv.moduleextraction.extractor.AMEX;
+import uk.ac.liv.moduleextraction.extractor.MEX;
 import uk.ac.liv.moduleextraction.extractor.ExtractorException;
-import uk.ac.liv.moduleextraction.extractor.STARAMEXHybridExtractor;
+import uk.ac.liv.moduleextraction.extractor.STARMEXHybridExtractor;
 import uk.ac.liv.moduleextraction.signature.SigManager;
 import uk.ac.liv.moduleextraction.signature.SignatureGenerator;
 import uk.ac.liv.moduleextraction.signature.WriteAxiomSignatures;
@@ -42,15 +42,15 @@ public class ModuleExtractionExamples {
     public static void usingModuleExtractors() throws ExtractorException {
         //Load the ontology from a file - CHANGE THIS to your own ontology
         //Make sure ontologies are suitable for use with the extractor before using it - i.e don't use more expressive  than ALCQI with AMEX
-        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/path/to/ontology.owl");
+        OWLOntology ont = OntologyLoader.loadOntologyAllAxioms("/Users/konev/IdeaProjects/module-extraction-obsolete/test/data/galen.owl");
 
         //Create the module extractors - implement the Extractor interface
-        AMEX amex = new AMEX(ont);
-        STARAMEXHybridExtractor hybrid = new STARAMEXHybridExtractor(ont);
+        //AMEX amex = new AMEX(ont);
+        STARMEXHybridExtractor hybrid = new STARMEXHybridExtractor(ont);
         //MEX mex = new MEX(ont);
 
         //Generate a set of 1000 random axioms from the ontology
-        Set<OWLLogicalAxiom> randomAxs = ModuleUtils.generateRandomAxioms(ont.getLogicalAxioms(),1000);
+        Set<OWLLogicalAxiom> randomAxs = ModuleUtils.generateRandomAxioms(ont.getLogicalAxioms(),100);
 
         //Extract a module for the signature of each axiom
         for(OWLLogicalAxiom ax : randomAxs){
@@ -59,10 +59,10 @@ public class ModuleExtractionExamples {
             Set<OWLEntity> sig = ax.getSignature();
 
             //Extract the modules - N.B don't need a new extractor object for each signature
-            Set<OWLLogicalAxiom> amexMod = amex.extractModule(sig);
+            //Set<OWLLogicalAxiom> amexMod = amex.extractModule(sig);
             Set<OWLLogicalAxiom> hybridMod = hybrid.extractModule(sig);
 
-            System.out.println("AMEX: " + amexMod.size());
+            //System.out.println("AMEX: " + amexMod.size());
             System.out.println("HYBRID: " + hybridMod.size());
             System.out.println("STAR: " + hybrid.getStarModule().size()); //STAR module is computed through the hybrid module
             System.out.println();
