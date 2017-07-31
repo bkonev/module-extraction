@@ -146,7 +146,9 @@ public class AxiomSignatureExperiments {
 
             int domainSize = 1;
             new AxiomSignatureExperiments().runExperiments(signatureLocation,
-                    new NDepletingExperiment(domainSize,ont,ontFile), new File(ModulePaths.getResultLocation()));
+                    //new NDepletingExperiment(domainSize,ont,ontFile),
+                    new HybridExtractorExperiment(ont,ontFile),
+                    new File(ModulePaths.getResultLocation()));
 
             ont.getOWLOntologyManager().removeOntology(ont);
             ont = null;

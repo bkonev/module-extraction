@@ -81,7 +81,7 @@ public class NDepletingExperiment implements  Experiment{
         System.out.print("Extracting hybrid: ");
         hybridExperiment.performExperiment(signature);
         hybridModule = hybridExperiment.getHybridAmexModule();
-        System.out.println(hybridModule.size());
+        System.out.println(hybridModule.size()+ " AMEX, " + hybridExperiment.getHybridMexModule().size() + " MEX");
 
         int hybridSize = hybridModule.size();
 

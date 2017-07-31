@@ -61,15 +61,15 @@ public class HybridExtractorExperiment implements Experiment {
 		hybridAmexWatch = Stopwatch.createStarted();
 		//And then the iterated one 
 		hybridAmexModule = hybridAmexExtractor.extractModule(signature);
-		hybridAmexSize = hybridAmexModule.size();
 		hybridAmexWatch.stop();
+		hybridAmexSize = hybridAmexModule.size();
 
 		hybridMexExtractor = new STARMEXHybridExtractor(starModule);
 		hybridMexWatch = Stopwatch.createStarted();
 		//And then the iterated one
 		hybridMexModule = hybridMexExtractor.extractModule(signature);
-		hybridMexSize = hybridMexModule.size();
 		hybridMexWatch.stop();
+		hybridMexSize = hybridMexModule.size();
 	}
 
 	public int getHybridAmexSize(){
@@ -125,17 +125,27 @@ public class HybridExtractorExperiment implements Experiment {
 
 	@Override
 	public void writeMetrics(File experimentLocation) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(experimentLocation.getAbsoluteFile() + "/" + "experiment-results", false));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(experimentLocation.getAbsoluteFile() + "/" + "experiment-results.csv", false));
 
-		writer.write("StarSize, HybridAmexSize, Difference,HybridMexSize, Difference, StarExtractions, AmexExtractions, MexExtractions StarTime, HybridAmexTime, HybridMexTime,  OntLocation, SigLocation" + "\n");
-		writer.write(starSize + "," +
-				hybridAmexSize + "," + ((starSize == hybridAmexSize) ? "0" : "1") + "," +
-				hybridMexSize  + "," + ((hybridAmexSize == hybridMexSize) ? "0" : "1") + "," +
-				hybridAmexExtractor.getStarExtractions() + "," + hybridAmexExtractor.getAmexExtractions() + "," +
-				hybridMexExtractor.getStarExtractions() + "," + hybridMexExtractor.getMexExtractions() + "," +
-				starWatch.elapsed(TimeUnit.MILLISECONDS) + "," +
-				hybridAmexWatch.elapsed(TimeUnit.MILLISECONDS) + "," +
-				hybridMexWatch.elapsed(TimeUnit.MILLISECONDS) + "," +
+		writer.write(
+			"StarSize, " +
+				"HybridAmexSize, isDifference, " +
+				"HybridMexSize, isDifference, " +
+				"AmexStarExtractions, AmexAmexExtractions, " +
+				"MexStarExtractions, MexMexExtractions, " +
+				"StarTime, " +
+				"HybridAmexTime, " +
+				"HybridMexTime,  " +
+				"OntLocation, SigLocation" + "\n");
+		writer.write(
+			starSize + "," +
+				hybridAmexSize + "," + ((starSize == hybridAmexSize) ? "0" : "1") + ", " +
+				hybridMexSize  + "," + ((hybridAmexSize == hybridMexSize) ? "0" : "1") + ", " +
+				hybridAmexExtractor.getStarExtractions() + "," + hybridAmexExtractor.getAmexExtractions() + ", " +
+				hybridMexExtractor.getStarExtractions() + "," + hybridMexExtractor.getMexExtractions() + ", " +
+				starWatch.elapsed(TimeUnit.MILLISECONDS) + ", " +
+				hybridAmexWatch.elapsed(TimeUnit.MILLISECONDS) + ", " +
+				hybridMexWatch.elapsed(TimeUnit.MILLISECONDS) + ", " +
 				location.getAbsolutePath() + "," + sigLocation.getAbsolutePath() + "\n");
 		writer.flush();
 		writer.close();

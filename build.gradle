@@ -4,6 +4,8 @@ apply plugin: 'idea'
 
 //mainClassName = 'uk.ac.liv.moduleextraction.examples.ModuleExtractionExamples'
 mainClassName = 'uk.ac.liv.moduleextraction.experiments.AxiomSignatureExperiments'
+applicationDefaultJvmArgs = ["-Xmx2G"]
+
 
 //Need to be java 1.8+
 targetCompatibility = '1.8'
@@ -17,8 +19,8 @@ dependencies {
     // jar dependencies
     compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
     compile 'org.slf4j:slf4j-api:1.7.2'
-    // compile 'org.slf4j:slf4j-simple:1.7.2'
-    compile 'org.slf4j:slf4j-nop:1.7.2'
+    compile 'org.slf4j:slf4j-simple:1.7.2'
+    //compile 'org.slf4j:slf4j-nop:1.7.2'
     compile 'org.apache.commons:commons-compress:1.14'
 
 
