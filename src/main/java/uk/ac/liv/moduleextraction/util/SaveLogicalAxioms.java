@@ -20,6 +20,10 @@ public class SaveLogicalAxioms {
         if (files != null) {
             for(File ontFile : files){
                 System.out.println(ontFile);
+                if(ontFile.getName().contains("_logical")) {
+                    System.out.println("skipping");
+                    continue;
+                }
                 try {
                     sourceOnt = OntologyLoader.loadOntologyAllAxioms(ontFile.getAbsolutePath());
                     targetOnt = sourceOnt.getOWLOntologyManager().createOntology(
