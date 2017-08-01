@@ -1,9 +1,6 @@
 package uk.ac.liv.moduleextraction.util;
 
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.semanticweb.owlapi.model.*;
 import uk.ac.liv.moduleextraction.extractor.NotEquivalentToTerminologyException;
 
 import java.io.File;
@@ -36,7 +33,7 @@ public class SaveLogicalAxioms {
                     sourceOnt = null;
                     targetOnt = null;
                 }
-                catch (Exception e) {
+                catch (OWLRuntimeException e) {
                     e.printStackTrace(); // print stack trace and continue
                     if(sourceOnt!=null) {
                         sourceOnt.getOWLOntologyManager().removeOntology(sourceOnt);
