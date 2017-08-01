@@ -7,6 +7,7 @@ import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import uk.ac.liv.moduleextraction.extractor.STARAMEXHybridExtractor;
 import uk.ac.liv.moduleextraction.extractor.STARMEXHybridExtractor;
+import uk.ac.liv.moduleextraction.util.CPUTicker;
 import uk.ac.liv.moduleextraction.util.ModuleUtils;
 import uk.ac.manchester.cs.owlapi.modularity.ModuleType;
 import uk.ac.manchester.cs.owlapi.modularity.SyntacticLocalityModuleExtractor;
@@ -45,7 +46,7 @@ public class HybridExtractorExperiment implements Experiment {
 
 	@Override
 	public void performExperiment(Set<OWLEntity> signature) {
-		starWatch = Stopwatch.createStarted();
+		starWatch = Stopwatch.createStarted(new CPUTicker());
 		//Compute the star module on it's own
 		Set<OWLAxiom> starAxioms = starExtractor.extract(signature);
 		starWatch.stop();
@@ -58,14 +59,14 @@ public class HybridExtractorExperiment implements Experiment {
 		hybridAmexExtractor = new STARAMEXHybridExtractor(starModule);
 
 
-		hybridAmexWatch = Stopwatch.createStarted();
+		hybridAmexWatch = Stopwatch.createStarted(new CPUTicker());
 		//And then the iterated one 
 		hybridAmexModule = hybridAmexExtractor.extractModule(signature);
 		hybridAmexWatch.stop();
 		hybridAmexSize = hybridAmexModule.size();
 
 		hybridMexExtractor = new STARMEXHybridExtractor(starModule);
-		hybridMexWatch = Stopwatch.createStarted();
+		hybridMexWatch = Stopwatch.createStarted(new CPUTicker());
 		//And then the iterated one
 		hybridMexModule = hybridMexExtractor.extractModule(signature);
 		hybridMexWatch.stop();
