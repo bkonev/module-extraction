@@ -19,6 +19,7 @@ public class SaveLogicalAxioms {
 
 
         for(File ontFile : files){
+            System.out.println(ontFile);
             OWLOntology sourceOnt = OntologyLoader.loadOntologyAllAxioms(ontFile.getAbsolutePath());
             OWLOntology targetOnt = sourceOnt.getOWLOntologyManager().createOntology(
                     IRI.create(new File(ontFile.getPath() + "_logical" )));
