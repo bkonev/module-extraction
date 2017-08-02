@@ -37,7 +37,7 @@ public class SaveLogicalAxioms {
                     sourceOnt = null;
                     targetOnt = null;
                 }
-                catch (OWLRuntimeException e) {
+                catch (OWLOntologyStorageException | OWLRuntimeException e) {
                     e.printStackTrace(); // print stack trace and continue
                     if(sourceOnt!=null) {
                         sourceOnt.getOWLOntologyManager().removeOntology(sourceOnt);
