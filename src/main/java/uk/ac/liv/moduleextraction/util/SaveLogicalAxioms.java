@@ -5,6 +5,7 @@ import uk.ac.liv.moduleextraction.extractor.NotEquivalentToTerminologyException;
 
 import java.io.File;
 import java.io.IOException;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class SaveLogicalAxioms {
 
@@ -37,7 +38,7 @@ public class SaveLogicalAxioms {
                     sourceOnt = null;
                     targetOnt = null;
                 }
-                catch (OWLOntologyStorageException | OWLRuntimeException e) {
+                catch (UncheckedExecutionException | OWLOntologyStorageException | OWLRuntimeException e) {
                     e.printStackTrace(); // print stack trace and continue
                     if(sourceOnt!=null) {
                         sourceOnt.getOWLOntologyManager().removeOntology(sourceOnt);
