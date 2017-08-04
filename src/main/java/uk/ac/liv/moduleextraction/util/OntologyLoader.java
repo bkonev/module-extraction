@@ -21,7 +21,9 @@ public class OntologyLoader {
 	public static OWLOntology loadOntologyAllAxioms(String pathName){
 
 		ToStringRenderer stringRenderer= new ToStringRenderer();
-		stringRenderer.setRenderer(() -> new DLSyntaxObjectRenderer());
+		stringRenderer.setRenderer(() -> {
+			return new DLSyntaxObjectRenderer();
+		});
 
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -64,6 +66,9 @@ public class OntologyLoader {
 				importe.printStackTrace();
 			} catch (OWLOntologyCreationException e) {
 				System.out.println("Creation failed: " + e.getCause());
+				e.printStackTrace();
+			} catch (OWLRuntimeException e) {
+				System.out.println("Runtime exception: " + e.getCause());
 				e.printStackTrace();
 			}
 		}
