@@ -7,6 +7,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.util.OWLAPIStreamUtils;
 import uk.ac.liv.moduleextraction.util.AxiomSplitter;
 import uk.ac.liv.moduleextraction.util.AxiomStructureInspector;
+import uk.ac.liv.moduleextraction.util.FullAxiomComparator;
 import uk.ac.liv.moduleextraction.util.ModuleUtils;
 
 import java.util.*;
@@ -29,6 +30,14 @@ public class AxiomDependencies extends HashMap<OWLLogicalAxiom, DependencySet>{
 	public AxiomDependencies(Set<OWLLogicalAxiom> axioms){
 		depth = new AxiomDefinitorialDepth(axioms);
 		sortedAxioms = depth.getDefinitorialSortedList();
+		inspector = new AxiomStructureInspector(axioms);
+		calculateDependencies();
+	}
+
+	public AxiomDependencies(Set<OWLLogicalAxiom> axioms, AxiomDefinitorialDepth d) {
+		depth = d;
+		sortedAxioms = new ArrayList<>(axioms);
+		Collections.sort(sortedAxioms,new FullAxiomComparator(depth.getAxiomDefinitorialDepthHashMap()));
 		inspector = new AxiomStructureInspector(axioms);
 		calculateDependencies();
 	}
@@ -90,4 +99,7 @@ public class AxiomDependencies extends HashMap<OWLLogicalAxiom, DependencySet>{
 		return sortedAxioms;
 	}
 
+	public AxiomDefinitorialDepth getDepth() {
+		return depth;
+	}
 }

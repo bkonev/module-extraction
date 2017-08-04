@@ -19,24 +19,26 @@ public class AxiomDefinitorialDepth {
 
 
     private Set<OWLLogicalAxiom> logicalAxioms;
-    private HashMap<OWLLogicalAxiom, Integer> definitorialDepth;
+    private HashMap<OWLLogicalAxiom, Integer> axiomDefinitorialDepth;
+    private HashMap<OWLClass, Integer> classDefinitorialDepth;
     private HashMap<OWLClass, Set<OWLClass>> immediateDependencies;
     private int max = 0;
     private Set<OWLLogicalAxiom> expressiveAxioms;
-    private OWLDataFactory factory;
+    //private OWLDataFactory factory;
 
     public AxiomDefinitorialDepth(OWLOntology ontology) {
         this(OWLAPIStreamUtils.asSet(ontology.logicalAxioms()));
     }
 
     public int lookup(OWLLogicalAxiom ax) {
-        return definitorialDepth.get(ax);
+        return axiomDefinitorialDepth.get(ax);
     }
 
     public AxiomDefinitorialDepth(Set<OWLLogicalAxiom> axioms) {
-        this.factory = OWLManager.getOWLDataFactory();
+        //this.factory = OWLManager.getOWLDataFactory();
         this.logicalAxioms = axioms;
-        this.definitorialDepth = new HashMap<OWLLogicalAxiom, Integer>(axioms.size());
+        this.axiomDefinitorialDepth = new HashMap<OWLLogicalAxiom, Integer>(axioms.size());
+        this.classDefinitorialDepth = new HashMap<OWLClass, Integer>();
         this.immediateDependencies = new HashMap<OWLClass, Set<OWLClass>>();
         this.expressiveAxioms = new HashSet<OWLLogicalAxiom>();
         populateImmediateDependencies();
@@ -48,7 +50,7 @@ public class AxiomDefinitorialDepth {
 
     public ArrayList<OWLLogicalAxiom> getDefinitorialSortedList() {
         ArrayList<OWLLogicalAxiom> sortedAxioms = new ArrayList<OWLLogicalAxiom>(logicalAxioms);
-        Collections.sort(sortedAxioms, new FullAxiomComparator(definitorialDepth));
+        Collections.sort(sortedAxioms, new FullAxiomComparator(axiomDefinitorialDepth));
 
         return sortedAxioms;
     }
@@ -80,13 +82,17 @@ public class AxiomDefinitorialDepth {
         Collections.shuffle(listaxioms);
         for (OWLLogicalAxiom axiom : listaxioms) {
             OWLClass name = (OWLClass) AxiomSplitter.getNameofAxiom(axiom);
-            definitorialDepth.put(axiom, calculateDepth(name));
+            axiomDefinitorialDepth.put(axiom, calculateDepth(name));
         }
     }
 
     /** Names can be recalculated which may be expensive
      *  maybe instead store definitorial depth for concept names again */
     private int calculateDepth(OWLClass name) {
+        Integer stored = classDefinitorialDepth.get(name);
+        if(stored != null) return stored;
+
+        // else compute the depth
         if (immediateDependencies.get(name) == null) {
             return 0;
         } else {
@@ -96,26 +102,31 @@ public class AxiomDefinitorialDepth {
                     depths.add(0);
                 }
                 else{
-                    depths.add(calculateDepth(dep));
+                    depths.add(classDefinitorialDepth.getOrDefault(dep, calculateDepth(dep)));
                 }
             }
             int result = 1 + Collections.max(depths);
             max = Math.max(max, result);
 
+            classDefinitorialDepth.put(name, result);
             return result;
         }
     }
 
+    public HashMap<OWLLogicalAxiom, Integer> getAxiomDefinitorialDepthHashMap() {
+        return axiomDefinitorialDepth;
+    }
+
     /*
-     * Expressive axioms often cannot be realised in terms of definitioral depth
-     * (role inclusions) or can create depth cycles (disjointness axioms). So
-     * we assign any non-inclusion or equation to be MAX+1 depth of any other
-     * axiom in the ontology;
-     */
+         * Expressive axioms often cannot be realised in terms of definitioral depth
+         * (role inclusions) or can create depth cycles (disjointness axioms). So
+         * we assign any non-inclusion or equation to be MAX+1 depth of any other
+         * axiom in the ontology;
+         */
     private void assignExpressiveAxiomsValue() {
         int expressiveValue = max + 1;
         for (OWLLogicalAxiom axiom : expressiveAxioms) {
-            definitorialDepth.put(axiom, expressiveValue);
+            axiomDefinitorialDepth.put(axiom, expressiveValue);
         }
     }
 

@@ -3,6 +3,8 @@ package uk.ac.liv.moduleextraction.extractor;
 import com.google.common.base.Stopwatch;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.liv.moduleextraction.metrics.ExtractionMetric;
 import uk.ac.liv.moduleextraction.util.ModuleUtils;
 import uk.ac.manchester.cs.owlapi.modularity.ModuleType;
@@ -18,17 +20,19 @@ import java.util.concurrent.TimeUnit;
 public class STARExtractor implements Extractor {
 
     private final OWLOntology ontology;
-    private OWLOntologyManager manager;
+    private static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     private Set<OWLLogicalAxiom> module;
     private Stopwatch starWatch;
 
+    private Logger logger = LoggerFactory.getLogger(STARExtractor.class);
+
     public STARExtractor(OWLOntology ontology){
         this.ontology = ontology;
-        manager = ontology.getOWLOntologyManager();
+        //manager = ontology.getOWLOntologyManager();
     }
 
     public STARExtractor(Set<OWLLogicalAxiom> axioms){
-        manager = OWLManager.createOWLOntologyManager();
+        //manager = OWLManager.createOWLOntologyManager();
         Set<OWLAxiom> newOntAxioms = new HashSet<OWLAxiom>();
         newOntAxioms.addAll(axioms);
         OWLOntology ont = null;
@@ -49,6 +53,7 @@ public class STARExtractor implements Extractor {
 
         //Because STAR can work with annotations etc. we extract logical ones only for a fair comparison of size
         module = ModuleUtils.getLogicalAxioms(starModule);
+        logger.trace("STAR done");
 
         return module;
     }

@@ -5,6 +5,9 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.liv.moduleextraction.extractor.AMEX;
 import uk.ac.liv.moduleextraction.extractor.STARAMEXHybridExtractor;
 import uk.ac.liv.moduleextraction.extractor.STARMEXHybridExtractor;
 import uk.ac.liv.moduleextraction.util.CPUTicker;
@@ -37,6 +40,7 @@ public class HybridExtractorExperiment implements Experiment {
 	private File location;
 	private File sigLocation;
 
+	private Logger logger = LoggerFactory.getLogger(HybridExtractorExperiment.class);
 
 	public HybridExtractorExperiment(OWLOntology ont, File originalLocation) {
 		this.ontology = ont;
@@ -46,8 +50,12 @@ public class HybridExtractorExperiment implements Experiment {
 
 	@Override
 	public void performExperiment(Set<OWLEntity> signature) {
-		starWatch = Stopwatch.createStarted(new CPUTicker());
 		//Compute the star module on it's own
+
+		logger.trace("Hybrid experiments starts for signature {}", signature);
+
+		logger.trace("... Extracting the STAR module");
+		starWatch = Stopwatch.createStarted(new CPUTicker());
 		Set<OWLAxiom> starAxioms = starExtractor.extract(signature);
 		starWatch.stop();
 
@@ -56,15 +64,17 @@ public class HybridExtractorExperiment implements Experiment {
 		starSize = starModule.size();
 
 		//Begin with the STAR module as it's the basis of the hybrid process anyway
+		logger.trace("... Extracting the StarAmexHybrid module");
+
 		hybridAmexExtractor = new STARAMEXHybridExtractor(starModule);
-
-
 		hybridAmexWatch = Stopwatch.createStarted(new CPUTicker());
 		//And then the iterated one 
 		hybridAmexModule = hybridAmexExtractor.extractModule(signature);
 		hybridAmexWatch.stop();
+
 		hybridAmexSize = hybridAmexModule.size();
 
+		logger.trace("... Extracting the StarMexHybrid module");
 		hybridMexExtractor = new STARMEXHybridExtractor(starModule);
 		hybridMexWatch = Stopwatch.createStarted(new CPUTicker());
 		//And then the iterated one

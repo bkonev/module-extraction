@@ -4,6 +4,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.OWLAPIStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.liv.moduleextraction.axiomdependencies.AxiomDefinitorialDepth;
 import uk.ac.liv.moduleextraction.axiomdependencies.AxiomDependencies;
 import uk.ac.liv.moduleextraction.axiomdependencies.DefinitorialAxiomStore;
 import uk.ac.liv.moduleextraction.checkers.AxiomDependencyChecker;
@@ -19,7 +20,7 @@ import java.util.Set;
  */
 public class MEX implements Extractor {
 
-    private AxiomDependencyChecker axiomDependencyChecker;
+    private static AxiomDependencyChecker axiomDependencyChecker = new AxiomDependencyChecker();
     private AxiomDependencies dependencies;
     private AxiomDependencies equivalenceDependencies;
     private Set<OWLClass> defT;
@@ -38,10 +39,13 @@ public class MEX implements Extractor {
     public MEX(Set<OWLLogicalAxiom> axioms) throws ExtractorException{
         logger.trace("MEX module extraction: input ontology: {}", (axioms.size() < 15) ? axioms : "too large to show");
         if(isOntologyValid(axioms)){
+            logger.trace("computing axiom dependencies");
             dependencies = new AxiomDependencies(axioms);
-            equivalenceDependencies = new AxiomDependencies(collectEquivalenceAxioms(axioms));
+            AxiomDefinitorialDepth definitorialDepth = dependencies.getDepth();
+            logger.trace("computing equivalence dependencies");
+            equivalenceDependencies = new AxiomDependencies(collectEquivalenceAxioms(axioms), definitorialDepth);
             axiomStore = new DefinitorialAxiomStore(dependencies.getDefinitorialSortedAxioms());
-            axiomDependencyChecker = new AxiomDependencyChecker();
+           // axiomDependencyChecker = new AxiomDependencyChecker();
         }
 
     }

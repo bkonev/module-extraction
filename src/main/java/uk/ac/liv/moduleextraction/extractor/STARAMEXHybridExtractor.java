@@ -5,6 +5,8 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.util.OWLAPIStreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.liv.moduleextraction.cycles.OntologyCycleVerifier;
 import uk.ac.liv.moduleextraction.filters.ALCQIwithAtomicLHSFilter;
 import uk.ac.liv.moduleextraction.filters.OntologyFilters;
@@ -20,6 +22,7 @@ public class STARAMEXHybridExtractor extends AbstractHybridExtractor {
     private int starExtractions;
     private int amexExtractions;
     private Set<OWLLogicalAxiom> starModule;
+    private Logger logger = LoggerFactory.getLogger(STARAMEXHybridExtractor.class);
 
     public STARAMEXHybridExtractor(Set<OWLLogicalAxiom> ont) {
         super(ont);
@@ -32,6 +35,7 @@ public class STARAMEXHybridExtractor extends AbstractHybridExtractor {
 
     @Override
     Set<OWLLogicalAxiom> extractUsingFirstExtractor(Set<OWLEntity> signature) {
+        logger.trace("Extracting STAR");
         STARExtractor starExtractor = new STARExtractor(module);
         ++starExtractions;
         Set<OWLLogicalAxiom> module = starExtractor.extractModule(signature);
@@ -46,9 +50,13 @@ public class STARAMEXHybridExtractor extends AbstractHybridExtractor {
     Set<OWLLogicalAxiom> extractUsingSecondExtractor(Set<OWLEntity> signature) {
         amexExtractions++;
 
+        logger.trace("Extracting AMEX");
         //Remove any axioms which cause ontology to not be an acyclic ALCQI terminology with RCIs
+
+        logger.trace("... get unsopported axioms");
         Set<OWLLogicalAxiom> unsupported = getUnsupportedAxioms(module);
         module.removeAll(unsupported);
+        logger.trace("... get cycle");
         Set<OWLLogicalAxiom> cycleCausing = getCycleCausingAxioms(module);
         module.removeAll(cycleCausing);
         unsupported.addAll(cycleCausing);
@@ -61,6 +69,7 @@ public class STARAMEXHybridExtractor extends AbstractHybridExtractor {
             e.printStackTrace();
         }
 
+        logger.trace("compute AMEX");
         return amex.extractModule(unsupported, signature);
     }
 
