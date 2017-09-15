@@ -71,10 +71,21 @@ public class OntologyCycleVerifier {
 					if(component.contains(name)){
 						OWLClassExpression def = AxiomSplitter.getDefinitionofAxiom(axiom);
 						Set<OWLClass> defCls = ModuleUtils.getNamedClassesInSignature(def);
-						Set<OWLClass> inter = Sets.intersection(component, defCls);
+						// avoiding the computation of a true set intersection. Aslo, defCls seems to contain fewer
+						// elements than component, so iterating over it.
+						//Set<OWLClass> inter = Sets.intersection(component, defCls);
+						//System.out.println("component size: " + component.size() + "  defCls size: " + defCls.size());
+						for(OWLClass elem: defCls) {
+							if(component.contains(elem)) {
+								cycleCausing.add(axiom);
+								break;
+							}
+						}
+						/*
 						if(!inter.isEmpty()){
 							cycleCausing.add(axiom);
 						}
+						*/
 					}
 				}
 		}
