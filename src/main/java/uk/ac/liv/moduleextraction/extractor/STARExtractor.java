@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class STARExtractor implements Extractor {
 
     private final OWLOntology ontology;
-    private static OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    private OWLOntologyManager manager;
     private Set<OWLLogicalAxiom> module;
     private Stopwatch starWatch;
 
@@ -28,12 +28,12 @@ public class STARExtractor implements Extractor {
 
     public STARExtractor(OWLOntology ontology){
         this.ontology = ontology;
-        //manager = ontology.getOWLOntologyManager();
+        manager = ontology.getOWLOntologyManager();
     }
 
     public STARExtractor(Set<OWLLogicalAxiom> axioms){
-        //manager = OWLManager.createOWLOntologyManager();
-        Set<OWLAxiom> newOntAxioms = new HashSet<OWLAxiom>();
+        manager = OWLManager.createOWLOntologyManager();
+        Set<OWLAxiom> newOntAxioms = new HashSet<>();
         newOntAxioms.addAll(axioms);
         OWLOntology ont = null;
         try {
